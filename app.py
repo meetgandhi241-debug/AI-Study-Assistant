@@ -1,14 +1,13 @@
-Replace your current app.py with this structure
-
 import streamlit as st
 import google.generativeai as genai
 from pypdf import PdfReader
 import pandas as pd
+import json
 
 # ==========================
 # GEMINI API KEY
 # ==========================
-API_KEY = "YOUR_API_KEY_HERE"
+API_KEY = “YOUR_GEMINI_API_KEY”
 
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-2.5-flash")
@@ -40,6 +39,11 @@ if "chemistry_count" not in st.session_state:
 if "math_count" not in st.session_state:
     st.session_state.math_count = 0
 
+if "quiz_items" not in st.session_state:
+    st.session_state.quiz_items = []
+
+if "quiz_score" not in st.session_state:
+    st.session_state.quiz_score = None
 # ==========================
 # SIDEBAR
 # ==========================
@@ -245,41 +249,117 @@ Explain simply.
 # ==========================
 # MCQ MODE
 # ==========================
+# ==========================
+# MCQ MODE
 if mcq_btn:
 
     if question:
 
         prompt = f"""
-Generate 5 MCQs.
-
-Subject:
-{subject}
-
-Topic:
+You are an expert {subject} teacher.
+Create 5 multiple-choice questions about this topic:
 {question}
 
-Provide answers too.
-"""
-
+Return only a JSON array with objects containing:
+  question, options, answer
+Options should be an object with keys A, B, C, D.
+        """
         try:
 
             response = model.generate_content(
                 prompt
             )
 
-            st.subheader(
-                "MCQ Quiz"
-            )
+            raw = response.text
+            raw = raw.replace("```json", "")
+            raw = raw.replace("```", "")
+            raw = raw.strip()
 
-            st.write(
-                response.text
-            )
+            try:
+                quiz_items = json.loads(raw)
+            except Exception:
+                quiz_items = None
+
+            if isinstance(quiz_items, list):
+                st.session_state.quiz_items = quiz_items
+                st.session_state.quiz_score = None
+            else:
+                st.error("Could not parse MCQs from the model response.")
+                st.write(raw)
 
         except Exception:
 
             st.error(
                 "AI service unavailable or quota exceeded."
             )
+
+# --- MCQ Quiz Section (drop-in replacement) ---
+user_answers = {}
+
+quiz_items = st.session_state.get('quiz_items', [])
+if not quiz_items:
+    st.info("No quiz items available. Generate MCQs first.")
+else:
+    with st.form("quiz_form"):
+        st.write("### Multiple-choice Quiz")
+        temp_answers = []
+        for i, item in enumerate(quiz_items):
+            if isinstance(item, dict):
+                question_text = item.get('question', f"Question {i+1}")
+                options = item.get('options', []) or []
+            else:
+                question_text = str(item)
+                options = []
+
+            if options:
+                selected = st.radio(question_text, options)
+            else:
+                selected = st.text_input(question_text, value="")
+
+            temp_answers.append(selected)
+
+        submit = st.form_submit_button("Submit Quiz")
+
+    just_submitted = False
+    if submit:
+        just_submitted = True
+        score = 0
+        correct_count = 0
+        for i, item in enumerate(quiz_items):
+            correct = item.get('answer') if isinstance(item, dict) else None
+            selected = temp_answers[i] if i < len(temp_answers) else None
+            user_answers[i] = selected
+            if selected is None or selected == "":
+                continue
+            if correct is not None and selected == correct:
+                score += 1
+                correct_count += 1
+
+        st.session_state['quiz_score'] = score
+
+    # Show review only after a submission occurred
+    submitted_flag = just_submitted or ('quiz_score' in st.session_state and bool(user_answers))
+    if submitted_flag:
+        total = len(quiz_items)
+        score_display = st.session_state.get('quiz_score', 0)
+        st.write(f"**Score:** {score_display} / {total}")
+        st.write("### Quiz Review")
+        for i, item in enumerate(quiz_items):
+            if isinstance(item, dict):
+                question_text = item.get('question', f"Question {i+1}")
+                correct = item.get('answer')
+            else:
+                question_text = str(item)
+                correct = None
+
+            selected = user_answers.get(i)
+            is_correct = (selected == correct) if (correct is not None) else False
+            status = "✅ Correct" if is_correct else "❌ Incorrect"
+            st.write(f"Q{i+1}. {question_text}")
+            st.write(f"- Your answer: {selected}")
+            if (correct is not None) and (not is_correct):
+                st.write(f"- Correct answer: {correct}")
+            st.write(f"- {status}")
 
 # ==========================
 # PDF SUMMARY
