@@ -7,7 +7,7 @@ import json
 # ==========================
 # GEMINI API KEY
 # ==========================
-API_KEY  = "YOUR_GEMINI_API_KEY"
+API_KEY = st.secrets["GEMINI_API_KEY"]
 
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-2.5-flash")
