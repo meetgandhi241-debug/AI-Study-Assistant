@@ -40,10 +40,10 @@ https://ai-study-assistant-mvjna8bw5wxhmbetksejjz.streamlit.app
 ## Screenshots
 
 ### Home Page
-![Home Page](home page1.png)
+![Home Page](home_page1.png)
 
 ### Home Page 2
-![Home Page 2](home page2.png)
+![Home Page 2](home_page2.png)
 
 ### Question Answering
-![Question Answering](question answering.png)
+![Question Answering](question_answering.png)
