@@ -32,3 +32,7 @@ Track: Creative Apps
 
 Deployment:
 https://ai-study-assistant-mvjna8bw5wxhmbetksejjz.streamlit.app
+
+## Architecture Diagram
+
+![Architecture Diagram](AI_Study_Assistant_Architecture_Professional.png)
