@@ -22,3 +22,13 @@ An AI-powered study assistant built with Streamlit and Gemini AI.
 pip install -r requirements.txt
 
 streamlit run app.py
+
+## Live Demo
+https://ai-study-assistant-mvjna8bw5wxhmbetksejjz.streamlit.app
+
+## Hackathon Submission
+
+Track: Creative Apps
+
+Deployment:
+https://ai-study-assistant-mvjna8bw5wxhmbetksejjz.streamlit.app
