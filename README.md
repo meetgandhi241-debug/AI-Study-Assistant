@@ -62,6 +62,18 @@ https://ai-study-assistant-mvjna8bw5wxhmbetksejjz.streamlit.app
 
 ![Question Answering](question_answering.png)
 
+### MCQ Quiz Generation
+![MCQ Quiz Generation](mcq_quiz1.png)
+
+### Quiz Review & Evaluation
+![Quiz Review & Evaluation](mcq_quiz2.png)
+
+### PDF Summary
+![PDF Summary](pdf_summary2.png)
+
+### Personalized Study Plan
+![Personalized Study Plan](study_plan.png)
+
 ## Future Scope
 
 - Voice-based learning
